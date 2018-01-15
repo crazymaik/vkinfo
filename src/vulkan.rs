@@ -1,4 +1,5 @@
 use lib;
+use std::default::{Default};
 use std::ffi::CStr;
 use std::io;
 use std::mem;
@@ -142,22 +143,70 @@ pub struct Instance {
     library: Rc<Library>,
     instance: vk::Instance,
     destroy_instance: unsafe extern fn(vk::Instance, *const vk::AllocationCallbacks) -> c_void,
+    enumerate_physical_devices: unsafe extern fn(vk::Instance, *mut u32, *mut vk::PhysicalDevice) -> vk::Result,
+    get_physical_device_features: unsafe extern fn(vk::PhysicalDevice, *mut vk::PhysicalDeviceFeatures) -> c_void,
+    get_physical_device_properties: unsafe extern fn(vk::PhysicalDevice, *mut vk::PhysicalDeviceProperties) -> c_void,
 }
 
 impl Instance {
     fn new(library: &Rc<Library>, instance: vk::Instance) -> io::Result<Instance> {
         let destroy_instance = library.load(instance, b"vkDestroyInstance\0")?;
+        let enumerate_physical_devices = library.load(instance, b"vkEnumeratePhysicalDevices\0")?;
+        let get_physical_device_features = library.load(instance, b"vkGetPhysicalDeviceFeatures\0")?;
+        let get_physical_device_properties = library.load(instance, b"vkGetPhysicalDeviceProperties\0")?;
 
         Ok(Instance {
             library: library.clone(),
             instance: instance,
             destroy_instance: destroy_instance,
+            enumerate_physical_devices: enumerate_physical_devices,
+            get_physical_device_features: get_physical_device_features,
+            get_physical_device_properties: get_physical_device_properties,
         })
     }
 
     pub fn destroy_instance(&self) {
         unsafe {
             (self.destroy_instance)(self.instance, ptr::null());
+        }
+    }
+
+    pub fn enumerate_physical_devices(&self) -> Result<Vec<vk::PhysicalDevice>> {
+        unsafe {
+            let mut count: u32 = 0;
+
+            let err = (self.enumerate_physical_devices)(self.instance, &mut count, ptr::null_mut());
+            if err != vk::Result::Success {
+                return Err(err);
+            }
+
+            let mut devices = Vec::with_capacity(count as usize);
+            devices.set_len(count as usize);
+
+            let err = (self.enumerate_physical_devices)(self.instance, &mut count, devices.as_mut_ptr());
+            if err != vk::Result::Success {
+                return Err(err);
+            }
+
+            Ok(devices)
+        }
+    }
+
+    pub fn get_physical_device_features(&self, physical_device: vk::PhysicalDevice) -> vk::PhysicalDeviceFeatures {
+        unsafe {
+            let mut features: vk::PhysicalDeviceFeatures;
+            features = mem::uninitialized();
+            (self.get_physical_device_features)(physical_device, &mut features);
+            features
+        }
+    }
+
+    pub fn get_physical_device_properties(&self, physical_device: vk::PhysicalDevice) -> vk::PhysicalDeviceProperties {
+        unsafe {
+            let mut properties: vk::PhysicalDeviceProperties;
+            properties = mem::uninitialized();
+            (self.get_physical_device_properties)(physical_device, &mut properties);
+            properties
         }
     }
 }
