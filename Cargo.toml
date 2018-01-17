@@ -4,4 +4,5 @@ version = "0.1.0"
 authors = ["Michael Zoech <michi.zoech@gmail.com>"]
 
 [dependencies]
+bitflags = "1.0.1"
 libloading = "0.4.3"

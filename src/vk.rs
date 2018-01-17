@@ -56,22 +56,31 @@ pub enum StructureType {
     MaxEnum = 0x7fffffff,
 }
 
-#[repr(i32)]
-#[derive(Debug, PartialEq)]
-pub enum InstanceCreateFlags {
-    Reserved = 0,
+bitflags! {
+    pub struct InstanceCreateFlags: u32 {
+        const Reserved = 0;
+    }
 }
 
-#[repr(i32)]
-#[derive(Debug, PartialEq)]
-pub enum SampleCountFlags {
-    Reserved = 0, // TODO
+bitflags! {
+    pub struct SampleCountFlags: u32 {
+        const Count1Bit = 0x00000001;
+        const Count2Bit = 0x00000002;
+        const Count4Bit = 0x00000004;
+        const Count8Bit = 0x00000008;
+        const Count16Bit = 0x00000010;
+        const Count32Bit = 0x00000020;
+        const Count64Bit = 0x00000040;
+    }
 }
 
-#[repr(i32)]
-#[derive(Debug, PartialEq)]
-pub enum QueueFlags {
-    Reserved = 0, // TODO
+bitflags! {
+    pub struct QueueFlags: u32 {
+        const GraphicsBit = 0x00000001;
+        const ComputeBit = 0x00000002;
+        const TransferBit = 0x00000004;
+        const SparseBindingBit = 0x00000008;
+    }
 }
 
 #[repr(C)]

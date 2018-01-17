@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate bitflags;
 extern crate libloading as lib;
 
 use std::os::raw::c_char;
