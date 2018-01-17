@@ -68,6 +68,20 @@ pub enum SampleCountFlags {
     Reserved = 0, // TODO
 }
 
+#[repr(i32)]
+#[derive(Debug, PartialEq)]
+pub enum QueueFlags {
+    Reserved = 0, // TODO
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct Extend3D {
+    pub width: u32,
+    pub height: u32,
+    pub depth: u32,
+}
+
 pub struct LayerNameType(pub [c_char; MAX_EXTENSION_NAME_SIZE]);
 
 impl fmt::Debug for LayerNameType {
@@ -360,4 +374,13 @@ pub struct PhysicalDeviceSparseProperties {
     residency_standard_3d_block_shape: Bool32,
     residency_aligned_mip_size: Bool32,
     residency_non_resident_strict: Bool32,
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct QueueFamilyProperties {
+    pub queue_flags: QueueFlags,
+    pub queue_count: u32,
+    pub timestamp_valid_bits: u32,
+    pub min_image_transfer_granularity: Extend3D,
 }

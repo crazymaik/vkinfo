@@ -43,6 +43,8 @@ fn main() {
         println!("Features\n{:?}", features);
         let properties = instance.get_physical_device_properties(physical_device);
         println!("Properties\n{:?}", properties);
+        let queue_family_properties = instance.get_physical_device_queue_family_properties(physical_device);
+        println!("Queue Family Properties\n{:?}", queue_family_properties);
     }
 
     instance.destroy_instance();

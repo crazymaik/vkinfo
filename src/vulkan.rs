@@ -146,6 +146,7 @@ pub struct Instance {
     enumerate_physical_devices: unsafe extern fn(vk::Instance, *mut u32, *mut vk::PhysicalDevice) -> vk::Result,
     get_physical_device_features: unsafe extern fn(vk::PhysicalDevice, *mut vk::PhysicalDeviceFeatures) -> c_void,
     get_physical_device_properties: unsafe extern fn(vk::PhysicalDevice, *mut vk::PhysicalDeviceProperties) -> c_void,
+    get_physical_device_queue_family_properties: unsafe extern fn(vk::PhysicalDevice, *mut u32, *mut vk::QueueFamilyProperties) -> c_void,
 }
 
 impl Instance {
@@ -154,6 +155,7 @@ impl Instance {
         let enumerate_physical_devices = library.load(instance, b"vkEnumeratePhysicalDevices\0")?;
         let get_physical_device_features = library.load(instance, b"vkGetPhysicalDeviceFeatures\0")?;
         let get_physical_device_properties = library.load(instance, b"vkGetPhysicalDeviceProperties\0")?;
+        let get_physical_device_queue_family_properties = library.load(instance, b"vkGetPhysicalDeviceQueueFamilyProperties")?;
 
         Ok(Instance {
             library: library.clone(),
@@ -162,6 +164,7 @@ impl Instance {
             enumerate_physical_devices: enumerate_physical_devices,
             get_physical_device_features: get_physical_device_features,
             get_physical_device_properties: get_physical_device_properties,
+            get_physical_device_queue_family_properties: get_physical_device_queue_family_properties,
         })
     }
 
@@ -206,6 +209,17 @@ impl Instance {
             let mut properties: vk::PhysicalDeviceProperties;
             properties = mem::uninitialized();
             (self.get_physical_device_properties)(physical_device, &mut properties);
+            properties
+        }
+    }
+
+    pub fn get_physical_device_queue_family_properties(&self, physical_device: vk::PhysicalDevice) -> Vec<vk::QueueFamilyProperties> {
+        unsafe {
+            let mut count: u32 = 0;
+            (self.get_physical_device_queue_family_properties)(physical_device, &mut count, ptr::null_mut());
+            let mut properties = Vec::with_capacity(count as usize);
+            properties.set_len(count as usize);
+            (self.get_physical_device_queue_family_properties)(physical_device, &mut count, properties.as_mut_ptr());
             properties
         }
     }
