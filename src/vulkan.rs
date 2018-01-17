@@ -142,11 +142,11 @@ pub struct Instance {
     #[allow(dead_code)]
     library: Rc<Library>,
     instance: vk::Instance,
-    destroy_instance: unsafe extern fn(vk::Instance, *const vk::AllocationCallbacks) -> c_void,
+    destroy_instance: unsafe extern fn(vk::Instance, *const vk::AllocationCallbacks),
     enumerate_physical_devices: unsafe extern fn(vk::Instance, *mut u32, *mut vk::PhysicalDevice) -> vk::Result,
-    get_physical_device_features: unsafe extern fn(vk::PhysicalDevice, *mut vk::PhysicalDeviceFeatures) -> c_void,
-    get_physical_device_properties: unsafe extern fn(vk::PhysicalDevice, *mut vk::PhysicalDeviceProperties) -> c_void,
-    get_physical_device_queue_family_properties: unsafe extern fn(vk::PhysicalDevice, *mut u32, *mut vk::QueueFamilyProperties) -> c_void,
+    get_physical_device_features: unsafe extern fn(vk::PhysicalDevice, *mut vk::PhysicalDeviceFeatures),
+    get_physical_device_properties: unsafe extern fn(vk::PhysicalDevice, *mut vk::PhysicalDeviceProperties),
+    get_physical_device_queue_family_properties: unsafe extern fn(vk::PhysicalDevice, *mut u32, *mut vk::QueueFamilyProperties),
 }
 
 impl Instance {
