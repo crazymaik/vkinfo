@@ -1,7 +1,9 @@
+use serde::ser::{Serialize, Serializer};
 use std::ffi::CStr;
 use std::fmt;
 use std::os::raw::c_char;
 use std::os::raw::c_void;
+use std::result;
 
 const MAX_EXTENSION_NAME_SIZE: usize = 256;
 const MAX_DESCRIPTION_SIZE: usize = 256;
@@ -49,7 +51,7 @@ pub enum Result {
 }
 
 #[repr(i32)]
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize)]
 pub enum StructureType {
     ApplicationInfo = 0,
     InstanceCreateInfo = 1,
@@ -57,12 +59,14 @@ pub enum StructureType {
 }
 
 bitflags! {
+    #[derive(Serialize)]
     pub struct InstanceCreateFlags: u32 {
         const Reserved = 0;
     }
 }
 
 bitflags! {
+    #[derive(Serialize)]
     pub struct SampleCountFlags: u32 {
         const Count1Bit = 0x00000001;
         const Count2Bit = 0x00000002;
@@ -75,6 +79,7 @@ bitflags! {
 }
 
 bitflags! {
+    #[derive(Serialize)]
     pub struct QueueFlags: u32 {
         const GraphicsBit = 0x00000001;
         const ComputeBit = 0x00000002;
@@ -84,7 +89,7 @@ bitflags! {
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Extend3D {
     pub width: u32,
     pub height: u32,
@@ -92,6 +97,13 @@ pub struct Extend3D {
 }
 
 pub struct LayerNameType(pub [c_char; MAX_EXTENSION_NAME_SIZE]);
+
+impl Serialize for LayerNameType {
+    fn serialize<S>(&self, serializer: S) -> result::Result<S::Ok, S::Error> where S:Serializer {
+        let s = unsafe { CStr::from_ptr(self.0.as_ptr()) };
+        serializer.serialize_str(&s.to_string_lossy())
+    }
+}
 
 impl fmt::Debug for LayerNameType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -102,6 +114,13 @@ impl fmt::Debug for LayerNameType {
 
 pub struct DescriptionType(pub [c_char; MAX_DESCRIPTION_SIZE]);
 
+impl Serialize for DescriptionType {
+    fn serialize<S>(&self, serializer: S) -> result::Result<S::Ok, S::Error> where S:Serializer {
+        let s = unsafe { CStr::from_ptr(self.0.as_ptr()) };
+        serializer.serialize_str(&s.to_string_lossy())
+    }
+}
+
 impl fmt::Debug for DescriptionType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let s = unsafe { CStr::from_ptr(self.0.as_ptr()) };
@@ -110,7 +129,7 @@ impl fmt::Debug for DescriptionType {
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct LayerProperties {
     pub layer_name: LayerNameType,
     pub spec_version: u32,
@@ -120,6 +139,13 @@ pub struct LayerProperties {
 
 pub struct ExtensionNameType(pub [c_char; MAX_EXTENSION_NAME_SIZE]);
 
+impl Serialize for ExtensionNameType {
+    fn serialize<S>(&self, serializer: S) -> result::Result<S::Ok, S::Error> where S:Serializer {
+        let s = unsafe { CStr::from_ptr(self.0.as_ptr()) };
+        serializer.serialize_str(&s.to_string_lossy())
+    }
+}
+
 impl fmt::Debug for ExtensionNameType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let s = unsafe { CStr::from_ptr(self.0.as_ptr()) };
@@ -128,7 +154,7 @@ impl fmt::Debug for ExtensionNameType {
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct ExtensionProperties {
     pub extension_name: ExtensionNameType,
     pub spec_version: u32,
@@ -171,7 +197,7 @@ pub struct InstanceCreateInfo {
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct PhysicalDeviceFeatures {
     pub robust_buffer_access: Bool32,
     pub full_draw_index_uint32: Bool32,
@@ -232,6 +258,13 @@ pub struct PhysicalDeviceFeatures {
 
 pub struct DeviceNameType(pub [c_char; MAX_PHYSICAL_DEVICE_NAME_SIZE]);
 
+impl Serialize for DeviceNameType {
+    fn serialize<S>(&self, serializer: S) -> result::Result<S::Ok, S::Error> where S:Serializer {
+        let s = unsafe { CStr::from_ptr(self.0.as_ptr()) };
+        serializer.serialize_str(&s.to_string_lossy())
+    }
+}
+
 impl fmt::Debug for DeviceNameType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let s = unsafe { CStr::from_ptr(self.0.as_ptr()) };
@@ -240,7 +273,7 @@ impl fmt::Debug for DeviceNameType {
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct PhysicalDeviceProperties {
     api_version: u32,
     driver_version: u32,
@@ -254,7 +287,7 @@ pub struct PhysicalDeviceProperties {
 }
 
 #[repr(i32)]
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize)]
 pub enum PhysicalDeviceType {
     Other = 0,
     IntegratedGpu = 1,
@@ -265,7 +298,7 @@ pub enum PhysicalDeviceType {
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct PhysicalDeviceLimits {
     pub max_image_dimension_1d: u32,
     pub max_image_dimension_2d: u32,
@@ -376,7 +409,7 @@ pub struct PhysicalDeviceLimits {
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct PhysicalDeviceSparseProperties {
     residency_standard_2d_block_shape: Bool32,
     residency_standard_2d_multisample_block_shape: Bool32,
@@ -386,7 +419,7 @@ pub struct PhysicalDeviceSparseProperties {
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct QueueFamilyProperties {
     pub queue_flags: QueueFlags,
     pub queue_count: u32,
